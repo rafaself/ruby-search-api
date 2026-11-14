@@ -65,8 +65,7 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
 
   test "POST without credentials saves a failed record and returns 503 without HTTP" do
     http = FakeHttp.new
-    assert_provider_failure(http, 503, "Search provider is not configured.", api_key: "")
-    assert_empty http.requests
+    assert_provider_failure(http, 503, "Search provider is not configured.", api_key: "", expected_requests: 0)
   end
 
   test "POST with documented no matches completes with an empty JSON array" do
@@ -117,7 +116,7 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
 
   private
 
-  def assert_provider_failure(http, status, message, api_key: "test")
+  def assert_provider_failure(http, status, message, api_key: "test", expected_requests: 1)
     with_serpapi_client(SerpApiClient.new(api_key: api_key, http: http)) do
       assert_difference("Search.count", 1) do
         post searches_url, params: { search: { query: "ruby" } }, as: :json
@@ -133,5 +132,6 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     get search_url(search), as: :json
     assert_response :ok
     assert_equal "failed", response.parsed_body["status"]
+    assert_equal expected_requests, http.requests.length
   end
 end

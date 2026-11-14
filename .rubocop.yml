@@ -1,0 +1,9 @@
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+AllCops:
+  NewCops: disable
+  TargetRubyVersion: 3.4
+
+Layout/SpaceInsideArrayLiteralBrackets:
+  EnforcedStyle: no_space

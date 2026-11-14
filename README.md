@@ -13,17 +13,7 @@ the saved organic results as JSON.
 - `config/routes.rb` maps HTTP requests to controller actions.
 - `config/database.yml` configures SQLite for each Rails environment.
 - `config/application.rb` loads the Rails components used by this API.
-- `Gemfile` lists Rails, SQLite, and Puma.
-
-## Ruby concepts
-
-`SearchApi` is a module that namespaces the application. Controllers are
-classes: `SearchesController` inherits from `ApplicationController`, and each
-action handles one route. `Search` inherits from `ApplicationRecord`, which
-connects it to the `searches` table through Rails naming conventions. Active
-Record validates model attributes and reads or writes rows in SQLite; for
-example, `Search.find(id)` loads a row and `search.save` validates and persists
-a new record. `render json:` turns a model or Ruby hash into a JSON response.
+- `Gemfile` lists the application and development dependencies.
 
 ## Search endpoints
 
@@ -103,57 +93,24 @@ raw network exceptions. Fetch the saved search with `GET /searches/:id` using
 the returned `search_id`. GET and DELETE operate on stored data and do not call
 SerpApi. Existing pending searches are not automatically executed.
 
-## Request lifecycle
+## Provider behavior
 
-1. Rails matches the HTTP verb and path in `config/routes.rb` to a controller
-   action.
-2. `SearchesController` permits only the query and saves a pending search.
-   Active Record validates it before any provider call. Invalid queries return
-   `422` without saving a record or making an HTTP request.
-3. `Search#perform!` saves `processing`, then invokes `SerpApiClient#search`.
-   The client calls `https://serpapi.com/search.json` with `engine=google`, the
-   query, the environment API key, and `async=false`.
-4. The client checks the HTTP status, parses the JSON, validates the response,
-   and extracts up to 10 organic results. Active Record saves those results and
-   `completed` together. On an expected provider failure, it saves `failed` and
-   re-raises the safe client error for the controller to render.
-5. Active Record handles SQL and JSON conversion, sets timestamps, and loads
-   SQLite's assigned ID. `GET` actions load rows through Active Record without
-   re-running searches. A missing ID is
-   converted by `ApplicationController` into a JSON `404` response.
-6. `DELETE` removes the row through Active Record and returns an empty `204`
-   response.
+`SERPAPI_API_KEY` is read from the server environment and is never accepted in
+request parameters or stored in the database. The client uses HTTPS, sends a
+synchronous Google Search request, does not follow redirects, and does not
+retry. Connection and write timeouts are 5 seconds; the read timeout is 30
+seconds.
 
-## Design decisions
-
-- `SerpApiClient` uses Ruby's available `Net::HTTP` and JSON libraries, so no new
-  gems are needed. Its credentials come from `SERPAPI_API_KEY`; they are never
-  accepted from the API caller or stored in the search row.
-- The client uses HTTPS with certificate verification, a fixed provider host,
-  and URL-encoded query parameters. It does not follow redirects. Timeouts are
-  5 seconds for connection and writes, and 30 seconds for reads; these are
-  operation timeouts, not a total request deadline. Automatic retries are
-  disabled to avoid extra provider requests.
-- Explicit `Search#perform!` orchestration keeps controllers thin. Avoiding
-  model callbacks means saving or reading a search does not implicitly make a
-  network request. Each status update is committed before the next step; the
-  HTTP call does not hold a database transaction or SQLite write lock.
-- A synchronous call keeps the flow small and returns results immediately, but
-  occupies a Rails request worker until the provider responds or times out.
-  A process interruption may leave a record in `processing`.
-- Only expected transport/provider failures are handled. Database or programming
-  errors propagate normally. The API retains failed records for inspection,
-  with no persistent provider error-message column.
-- The client requires successful response metadata and rejects malformed JSON,
-  invalid result types, and API errors even when HTTP is `200`. SerpApi's
-  documented `Success` with `organic_results_state: "Fully empty"` and an
-  error message is treated as a completed search with no results. See the
-  [Google Search API](https://serpapi.com/search-api) and
-  [status/error documentation](https://serpapi.com/api-status-and-error-codes).
+Provider failures save a search with status `failed` and `results: []`. The
+POST response includes its `search_id`; fetch it with `GET /searches/:id`.
+Errors omit provider response bodies and raw network exceptions. GET and DELETE
+use saved data and do not call SerpApi. Existing pending searches are not
+automatically executed.
 
 ## Run locally
 
-From the project directory:
+Ruby 3.4.12 and Bundler are specified by `.ruby-version` and `Gemfile.lock`.
+From the project directory, install dependencies and prepare SQLite:
 
 ```sh
 bundle install
@@ -162,9 +119,9 @@ export SERPAPI_API_KEY='your-serpapi-api-key'
 bin/rails server
 ```
 
-Set the key in the server process environment. The app does not load `.env`
-files automatically. The migrations add JSON storage to existing searches
-with an empty array default, preserving their current statuses.
+Set the key in the server process environment before starting the server. The
+app does not load `.env` files automatically. The development database is
+`storage/development.sqlite3`.
 
 Check the endpoint at `http://localhost:3000/health`:
 
@@ -172,8 +129,7 @@ Check the endpoint at `http://localhost:3000/health`:
 curl http://localhost:3000/health
 ```
 
-It returns `{"status":"ok"}`. The development database is stored at
-`storage/development.sqlite3`.
+It returns `{"status":"ok"}`.
 
 ## Tests
 
@@ -182,5 +138,14 @@ bin/rails test
 ```
 
 The tests use fake HTTP responses and injected clients to cover result
-extraction, status persistence, error handling, and the API lifecycle. They do
-not make live SerpApi calls or require a real API key.
+extraction, status persistence, endpoints, and failure handling. Unexpected
+HTTP calls fail in the fake client, so the suite does not make live SerpApi
+requests, consume API credits, or require an API key.
+
+## Lint
+
+The project uses the RuboCop Rails Omakase profile:
+
+```sh
+bundle exec rubocop
+```
