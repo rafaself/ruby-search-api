@@ -1,24 +1,38 @@
-# README
+# Search API
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+A small API-only Ruby on Rails application using SQLite.
 
-Things you may want to cover:
+## Structure
 
-* Ruby version
+- `app/controllers/` contains the API base controller and health endpoint.
+- `app/models/application_record.rb` is the shared base class for future Active Record models.
+- `config/routes.rb` maps HTTP requests to controller actions.
+- `config/database.yml` configures SQLite for each Rails environment.
+- `config/application.rb` loads the Rails components used by this API.
+- `Gemfile` lists Rails, SQLite, and Puma.
 
-* System dependencies
+## Ruby concepts
 
-* Configuration
+`SearchApi` is a module that namespaces the application. Controllers are
+classes: `HealthController` inherits from `ApplicationController`. Its `show`
+method is an action, and `render json:` converts a Ruby hash into a JSON
+response.
 
-* Database creation
+## Run locally
 
-* Database initialization
+From the project directory:
 
-* How to run the test suite
+```sh
+bundle install
+bin/rails db:prepare
+bin/rails server
+```
 
-* Services (job queues, cache servers, search engines, etc.)
+Check the endpoint at `http://localhost:3000/health`:
 
-* Deployment instructions
+```sh
+curl http://localhost:3000/health
+```
 
-* ...
+It returns `{"status":"ok"}`. The development database is stored at
+`storage/development.sqlite3`.
