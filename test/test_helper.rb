@@ -2,6 +2,9 @@ ENV["RAILS_ENV"] = "test"
 require_relative "../config/environment"
 require "rails/test_help"
 require "net/http"
+require "webmock/minitest"
+
+WebMock.disable_net_connect!
 
 module SerpApiTestHelpers
   class FakeHttp
@@ -33,14 +36,6 @@ module SerpApiTestHelpers
 
   def success_payload(results = [])
     { "search_metadata" => { "status" => "Success" }, "organic_results" => results }
-  end
-
-  def with_serpapi_client(client)
-    original = SerpApiClient.method(:new)
-    SerpApiClient.define_singleton_method(:new) { client }
-    yield
-  ensure
-    SerpApiClient.define_singleton_method(:new, original)
   end
 end
 

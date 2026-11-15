@@ -8,3 +8,7 @@ group :development do
   gem "dotenv-rails", "~> 3.1"
   gem "rubocop-rails-omakase", "~> 1.1", require: false
 end
+
+group :test do
+  gem "webmock"
+end
