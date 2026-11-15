@@ -3,11 +3,15 @@ require "test_helper"
 class SearchesControllerTest < ActionDispatch::IntegrationTest
   test "POST stores completed results and ignores client status and results" do
     results = [{ "position" => 1, "title" => "Ruby", "link" => "https://ruby-lang.org", "snippet" => "Ruby language" }]
+    location = "São Paulo, Brazil"
+    hl = "pt"
     http = FakeHttp.new(response: http_response(success_payload(results).to_json))
 
     with_serpapi_client(SerpApiClient.new(api_key: "test", http: http)) do
       assert_difference("Search.count", 1) do
-        post searches_url, params: { search: { query: "ruby", status: "failed", results: ["untrusted"] } }, as: :json
+        post searches_url,
+             params: { search: { query: "ruby", location: location, hl: hl, status: "failed", results: ["untrusted"] } },
+             as: :json
       end
     end
 
@@ -15,10 +19,18 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     body = response.parsed_body
     assert_equal "completed", body["status"]
     assert_equal results, body["results"]
-    assert_equal results, Search.find(body["id"]).results
+    search = Search.find(body["id"])
+    assert_equal results, search.results
+    assert_equal location, search.location
+    assert_equal hl, search.hl
     assert body["created_at"]
     assert body["updated_at"]
     assert_equal 1, http.requests.length
+
+    request_uri = URI(http.requests.first.fetch(:path))
+    provider_params = URI.decode_www_form(request_uri.query).to_h
+    assert_equal location, provider_params["location"]
+    assert_equal hl, provider_params["hl"]
   end
 
   test "POST with invalid query returns 422 without contacting the provider or saving" do
