@@ -42,6 +42,20 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_kind_of Array, response.parsed_body["errors"]
   end
 
+  test "POST with a non-hash search parameter returns JSON 400 without contacting the provider or saving" do
+    http = FakeHttp.new
+
+    with_serpapi_client(SerpApiClient.new(api_key: "test", http: http)) do
+      assert_no_difference("Search.count") do
+        post searches_url, params: { search: "ruby" }, as: :json
+      end
+    end
+
+    assert_response :bad_request
+    assert_equal ["param is missing or the value is empty or invalid: search"], response.parsed_body["errors"]
+    assert_empty http.requests
+  end
+
   test "POST with timeout saves a failed record and returns 504 with its ID" do
     assert_provider_failure(FakeHttp.new(error: Net::ReadTimeout.new("secret")), 504,
                             "Search provider timed out.")
