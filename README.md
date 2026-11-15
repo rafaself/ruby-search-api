@@ -2,9 +2,13 @@
 <img width="2508" height="627" alt="image" src="https://github.com/user-attachments/assets/5b1a1a83-3f3e-4acd-b09f-00f87a1b7ae4" />
 </p>
 
+---
+
 ### Description
 
 A Rails API that runs Google searches through SerpApi on demand and stores up to 10 organic results per search in SQLite.
+
+---
 
 ### Installation
 
@@ -33,6 +37,8 @@ bin/rails db:prepare
 ```
 
 > Keep the app local. It has no authentication or rate limiting; exposing it publicly with a configured key lets others trigger SerpApi requests.
+
+---
 
 ### Quick Start
 
@@ -63,6 +69,8 @@ or `POST` in `http://localhost:3000/searches`:
 
 > You can also import the Insomnia workspace from [`insomnia.json`](insomnia.json).
 
+---
+
 ### API Endpoints
 
 | Method | Path | Behavior |
@@ -76,6 +84,8 @@ or `POST` in `http://localhost:3000/searches`:
 `POST /searches` requires `query` and accepts optional `location` and `hl` fields. `location` biases results toward a place. `hl` sets Google's interface language; it does not filter results by document language. Each search stores up to 10 organic results. `POST` waits for SerpApi; `GET` and `DELETE` operate on stored data.
 
 If SerpApi fails, the `POST` response includes a `search_id` and the failed search is saved. Inspect it with `GET /searches/:id`.
+
+---
 
 ### Development
 
