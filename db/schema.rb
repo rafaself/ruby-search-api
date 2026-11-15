@@ -10,13 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_14_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_15_000000) do
   create_table "searches", force: :cascade do |t|
     t.string "query", null: false
     t.string "status", default: "pending", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.json "results", default: [], null: false
+    t.string "location"
+    t.string "hl"
     t.check_constraint "status IN ('pending', 'processing', 'completed', 'failed')", name: "searches_status_valid"
   end
 end

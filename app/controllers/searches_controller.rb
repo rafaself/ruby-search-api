@@ -28,6 +28,6 @@ class SearchesController < ApplicationController
   private
 
   def search_params
-    params.expect(search: [:query])
+    params.expect(search: [:query, :location, :hl])
   end
 end

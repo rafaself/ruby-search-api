@@ -18,18 +18,20 @@ does not schedule recurring monitoring.
 
 ## Search endpoints
 
-The API accepts and returns JSON. A search has `id`, `query`, `status`,
-`results`, `created_at`, and `updated_at` fields. New searches start with status
-`pending`, transition to `processing` before SerpApi is called, and finish as
-`completed` or `failed`.
+The API accepts and returns JSON. A search has `id`, `query`, `location`, `hl`,
+`status`, `results`, `created_at`, and `updated_at` fields. `location` and `hl`
+are optional: `location` biases results toward a place, and `hl` sets Google's
+language. Both are saved with the search and passed to SerpApi when supplied.
+New searches start with status `pending`, transition to `processing` before
+SerpApi is called, and finish as `completed` or `failed`.
 
-Create a search (the client supplies `query`; status and results are assigned
-by the server):
+Create a search (the client supplies `query` and can include optional
+`location` and `hl`; the server assigns status and results):
 
 ```sh
 curl -X POST http://localhost:3000/searches \
   -H 'Content-Type: application/json' \
-  -d '{"search":{"query":"ruby on rails"}}'
+  -d '{"search":{"query":"ruby on rails","location":"São Paulo, Brazil","hl":"pt"}}'
 ```
 
 A successful response is `201 Created` with the completed search:
@@ -38,6 +40,8 @@ A successful response is `201 Created` with the completed search:
 {
   "id": 1,
   "query": "ruby on rails",
+  "location": "São Paulo, Brazil",
+  "hl": "pt",
   "status": "completed",
   "results": [
     {

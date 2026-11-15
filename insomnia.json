@@ -22,7 +22,7 @@
       "name": "Base Environment",
       "data": {
         "base_url": "http://localhost:3000",
-        "search_id": "1"
+        "search_id": "replace-with-id"
       },
       "dataPropertyOrder": {
         "&": [
@@ -104,7 +104,7 @@
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"search\": {\n    \"query\": \"ruby on rails\"\n  }\n}"
+        "text": "{\n  \"search\": {\n    \"query\": \"ruby on rails\",\n    \"location\": \"São Paulo, Brazil\",\n    \"hl\": \"pt\"\n  }\n}"
       },
       "parameters": [],
       "headers": [

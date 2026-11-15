@@ -19,13 +19,16 @@ class SerpApiClient
     @http = http
   end
 
-  def search(query)
+  def search(query, location: nil, hl: nil)
     if @api_key.to_s.strip.empty?
       raise Error.new("Search provider is not configured.", http_status: 503)
     end
 
     uri = ENDPOINT.dup
-    uri.query = URI.encode_www_form(engine: "google", q: query, api_key: @api_key, async: false)
+    params = { engine: "google", q: query, api_key: @api_key, async: false }
+    params[:location] = location if location.present?
+    params[:hl] = hl if hl.present?
+    uri.query = URI.encode_www_form(params)
 
     @http.use_ssl = true
     @http.open_timeout = 5
