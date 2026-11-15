@@ -1,8 +1,9 @@
-# Search API
+# Rails Search History API
 
-A small API-only Ruby on Rails application using SQLite. It stores search
-requests, synchronously calls SerpApi's Google Search endpoint, and exposes
-the saved organic results as JSON.
+A small API-only Rails application backed by SQLite that stores search history
+and results. `POST /searches` calls SerpApi synchronously and waits for the
+search to finish before responding. Searches run only when requested; the app
+does not schedule recurring monitoring.
 
 ## Structure
 
@@ -19,8 +20,8 @@ the saved organic results as JSON.
 
 The API accepts and returns JSON. A search has `id`, `query`, `status`,
 `results`, `created_at`, and `updated_at` fields. New searches start with status
-`pending`, transition to `processing` before the HTTP call, and finish as
-`completed` or `failed`. The POST waits for this operation to finish.
+`pending`, transition to `processing` before SerpApi is called, and finish as
+`completed` or `failed`.
 
 Create a search (the client supplies `query`; status and results are assigned
 by the server):
@@ -75,8 +76,8 @@ with an `errors` array. Missing required request parameters return `400 Bad
 Request`, and unknown IDs return `404 Not Found`; both use the same `errors`
 array response shape.
 
-Provider failures still save the search with status `failed` and `results: []`.
-The POST returns an error status and the ID of that search:
+If SerpApi fails, the search is saved with status `failed` and `results: []`.
+The POST returns the provider error and the saved record's `search_id`:
 
 ```json
 {"errors":["Search provider timed out."],"search_id":1}
@@ -88,10 +89,8 @@ The POST returns an error status and the ID of that search:
 | Provider HTTP or API error, network/TLS failure, invalid response | `502 Bad Gateway` |
 | Missing or blank `SERPAPI_API_KEY` | `503 Service Unavailable` |
 
-Error messages do not contain provider bodies, credential-bearing URLs, or
-raw network exceptions. Fetch the saved search with `GET /searches/:id` using
-the returned `search_id`. GET and DELETE operate on stored data and do not call
-SerpApi. Existing pending searches are not automatically executed.
+Use the returned `search_id` with `GET /searches/:id` to inspect the saved
+record. GET and DELETE operate on stored data and do not call SerpApi.
 
 ## Provider behavior
 
@@ -99,13 +98,8 @@ SerpApi. Existing pending searches are not automatically executed.
 request parameters or stored in the database. The client uses HTTPS, sends a
 synchronous Google Search request, does not follow redirects, and does not
 retry. Connection and write timeouts are 5 seconds; the read timeout is 30
-seconds.
-
-Provider failures save a search with status `failed` and `results: []`. The
-POST response includes its `search_id`; fetch it with `GET /searches/:id`.
-Errors omit provider response bodies and raw network exceptions. GET and DELETE
-use saved data and do not call SerpApi. Existing pending searches are not
-automatically executed.
+seconds. Error messages omit provider response bodies, credential-bearing
+URLs, and raw network exceptions.
 
 ## Run locally
 
@@ -122,6 +116,10 @@ bin/rails server
 Set the key in the server process environment before starting the server. The
 app does not load `.env` files automatically. The development database is
 `storage/development.sqlite3`.
+
+This app is intended for local use. Do not expose it publicly with a configured
+`SERPAPI_API_KEY`: it has no authentication or rate limiting, so anyone who can
+reach `POST /searches` can trigger provider requests with that key.
 
 Check the endpoint at `http://localhost:3000/health`:
 
