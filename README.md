@@ -94,12 +94,13 @@ record. GET and DELETE operate on stored data and do not call SerpApi.
 
 ## Provider behavior
 
-`SERPAPI_API_KEY` is read from the server environment and is never accepted in
-request parameters or stored in the database. The client uses HTTPS, sends a
-synchronous Google Search request, does not follow redirects, and does not
-retry. Connection and write timeouts are 5 seconds; the read timeout is 30
-seconds. Error messages omit provider response bodies, credential-bearing
-URLs, and raw network exceptions.
+`SERPAPI_API_KEY` is loaded from the root `.env` file in development or read
+from the server environment. It is never accepted in request parameters or
+stored in the database. The client uses HTTPS, sends a synchronous Google
+Search request, does not follow redirects, and does not retry. Connection and
+write timeouts are 5 seconds; the read timeout is 30 seconds. Error messages
+omit provider response bodies, credential-bearing URLs, and raw network
+exceptions. The key value is not printed or logged.
 
 ## Run locally
 
@@ -109,12 +110,17 @@ From the project directory, install dependencies and prepare SQLite:
 ```sh
 bundle install
 bin/rails db:prepare
-export SERPAPI_API_KEY='your-serpapi-api-key'
 bin/rails server
 ```
 
-Set the key in the server process environment before starting the server. The
-app does not load `.env` files automatically. The development database is
+Add the key to the root `.env` file before starting the server:
+
+```sh
+SERPAPI_API_KEY=your-serpapi-api-key
+```
+
+The `.env` file is ignored by Git. In production, provide the key through the
+server's environment instead. The development database is
 `storage/development.sqlite3`.
 
 This app is intended for local use. Do not expose it publicly with a configured

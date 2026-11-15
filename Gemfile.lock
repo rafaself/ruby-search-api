@@ -83,6 +83,10 @@ GEM
     connection_pool (3.0.2)
     crass (1.0.8)
     date (3.6.0)
+    dotenv (3.2.0)
+    dotenv-rails (3.2.0)
+      dotenv (= 3.2.0)
+      railties (>= 6.1)
     drb (2.2.3)
     erb (6.0.7)
     erubi (1.13.1)
@@ -267,6 +271,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  dotenv-rails (~> 3.1)
   puma (>= 5.0)
   rails (~> 8.1.4, >= 8.1.4.1)
   rubocop-rails-omakase (~> 1.1)
