@@ -1,0 +1,186 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-11-15T00:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "__WORKSPACE_ID__",
+      "parentId": null,
+      "modified": 1794700800000,
+      "created": 1794700800000,
+      "name": "Ruby Search API",
+      "description": "Requests for the local Rails search history API. Configure SERPAPI_API_KEY on the Rails server in its .env file.",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "__BASE_ENVIRONMENT_ID__",
+      "parentId": "__WORKSPACE_ID__",
+      "modified": 1794700800000,
+      "created": 1794700800000,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3000",
+        "search_id": "replace-with-id"
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "search_id"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1,
+      "_type": "environment"
+    },
+    {
+      "_id": "__request_1__",
+      "parentId": "__WORKSPACE_ID__",
+      "modified": 1794700800000,
+      "created": 1794700800000,
+      "url": "{{ base_url }}/health",
+      "name": "Health",
+      "description": "Checks that the API is responding.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "id": "pair_health_accept"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "__request_2__",
+      "parentId": "__WORKSPACE_ID__",
+      "modified": 1794700800000,
+      "created": 1794700800000,
+      "url": "{{ base_url }}/searches",
+      "name": "List Searches",
+      "description": "Lists saved searches, newest first.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "id": "pair_list_accept"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 2,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "__request_3__",
+      "parentId": "__WORKSPACE_ID__",
+      "modified": 1794700800000,
+      "created": 1794700800000,
+      "url": "{{ base_url }}/searches",
+      "name": "Create Search",
+      "description": "Creates a search and waits for SerpApi. Sending this request uses the key configured on the Rails server and consumes provider usage.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"search\": {\n    \"query\": \"ruby on rails\"\n  }\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "id": "pair_create_accept"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_create_content_type"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 3,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "__request_4__",
+      "parentId": "__WORKSPACE_ID__",
+      "modified": 1794700800000,
+      "created": 1794700800000,
+      "url": "{{ base_url }}/searches/{{ search_id }}",
+      "name": "Get Search",
+      "description": "Set search_id in the base environment to a saved search ID.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "id": "pair_get_accept"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 4,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "__request_5__",
+      "parentId": "__WORKSPACE_ID__",
+      "modified": 1794700800000,
+      "created": 1794700800000,
+      "url": "{{ base_url }}/searches/{{ search_id }}",
+      "name": "Delete Search",
+      "description": "Deletes the saved search with ID set in the base environment.",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 5,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    }
+  ]
+}
