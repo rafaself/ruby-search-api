@@ -22,7 +22,7 @@
       "name": "Base Environment",
       "data": {
         "base_url": "http://localhost:3000",
-        "search_id": "replace-with-id"
+        "search_id": "1"
       },
       "dataPropertyOrder": {
         "&": [
