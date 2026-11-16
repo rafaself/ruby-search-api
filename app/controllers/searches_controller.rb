@@ -12,6 +12,7 @@ class SearchesController < ApplicationController
     else
       render json: { errors: search.errors.full_messages }, status: :unprocessable_entity
     end
+
   rescue SerpApiClient::Error => error
     render json: { errors: [error.message], search_id: search.id }, status: error.http_status
   end
