@@ -8,7 +8,7 @@ class SearchesController < ApplicationController
 
     if search.save
       search.perform!
-      render json: search, status: :created
+      render json: search, status: :created, location: search_url(search)
     else
       render json: { errors: search.errors.full_messages }, status: :unprocessable_entity
     end
